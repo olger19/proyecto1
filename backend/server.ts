@@ -1,24 +1,29 @@
 import express from "express";
 import cors from "cors";
-import { chromium } from "playwright";
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 
-app.use(cors()); // Permitir acceso desde React
+app.use(cors());
+app.use(express.json());
 
-app.get("/api/scrape", async (req, res) => {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.goto("https://www.alkhofarsac.com/shop/");
-
-  const title = await page.title();
-  const links = await page.$$eval("a", (anchors) =>
-    anchors.map((a) => ({ text: a.innerText, href: a.href }))
-  );
-
-  await browser.close();
-  res.json({ title, links });
+// Ruta base para probar que el servidor está funcionando
+app.get("/", (req, res) => {
+    res.send("Servidor funcionando correctamente 🚀");
 });
 
-app.listen(PORT, () => console.log(`Backend en http://localhost:${PORT}`));
+// Importa y usa el scraper aquí si es necesario
+import scraper from "./scraper";
+app.get("/scrape", async (req, res) => {
+    try {
+        const data = await scraper();
+        res.json(data);
+    } catch (error) {
+        console.error("Error en el scraping:", error);
+        res.status(500).json({ error: "Error al obtener los datos" });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
