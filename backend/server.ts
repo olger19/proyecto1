@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 
+import scraper from "./scraper";
+
 const app = express();
 const PORT = 3000;
 
@@ -12,8 +14,8 @@ app.get("/", (req, res) => {
     res.send("Servidor funcionando correctamente 🚀");
 });
 
-// Importa y usa el scraper aquí si es necesario
-import scraper from "./scraper";
+
+// Ruta del scraping
 app.get("/scrape", async (req, res) => {
     try {
         const data = await scraper();
