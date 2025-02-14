@@ -35,27 +35,33 @@ async function scrapeData() {
           timeout: 60000,
         });
 
-        const title = await productPage.evaluate(() => {
-          const h1Element = document.querySelector("h1");
-          return h1Element ? h1Element.innerText : "Título no encontrado";
+        const productData = await productPage.evaluate(() => {
+          const titleElement = document.querySelector("h1") as HTMLElement;
+          const descriptionElement = document.querySelector("#tab-description") as HTMLElement; // Descripcion no encontrada MEJORAR ESTO
+    
+          const title = titleElement?.innerText.trim() || "Título no encontrado";
+          const description = descriptionElement?.textContent?.trim() || "Descripción no encontrada";
+    
+          return { title, description };
         });
 
-        console.log(`Producto encontrado: ${title}`);
-        products.push({ title, link });
+        console.log(`Producto encontrado: ${productData.title}`);
+        products.push({ title: productData.title, description: productData.description });
 
         await productPage.close(); // Cerrar la pestaña del producto
 
-        // Aplicar `Crawl-delay: 5`
+        // Aplicar 'Crawl-delay: 5'
         console.log("Esperando 5 segundos para respetar `robots.txt`...");
         await new Promise((resolve) => setTimeout(resolve, 5000));
+
       } catch (error) {
         console.error(`Error al extraer el producto ${link}:`, error);
         products.push({ title: "Error al extraer", link });
         await productPage.close();
       }
     }
-
     return { products };
+
   } catch (error) {
     console.error("Error en el scraper:", error);
     return { error: "No se pudo obtener la información" };
